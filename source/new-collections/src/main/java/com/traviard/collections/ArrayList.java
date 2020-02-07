@@ -1,6 +1,9 @@
 package com.traviard.collections;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * @author Sachith Dickwella
@@ -9,28 +12,39 @@ import java.util.Iterator;
 public class ArrayList<T> implements List<T> {
 
     /**
-     *
+     * Core array instance which hold all the data add into the {@link ArrayList}.
      */
     private Object[] values;
+    /**
+     * Keep the current index of the latest value.
+     */
+    private int size = 0;
 
     /**
-     *
+     * Default constructor implementation initialize {@link #values} instance with
+     * default configuration. Which is new {@link Object[]} with size default to {@code 10}.
      */
     public ArrayList() {
         values = new Object[10];
     }
 
     /**
+     * Overloaded constructor implementation with the parameter to initialize the
+     * {@link #values} instance with user defined size.
      *
+     * @param initialSize the initial array size.
      */
     public ArrayList(int initialSize) {
         values = new Object[initialSize];
     }
 
     /**
+     * Overloaded constructor implementation with {@link Collection<T>} to initialize a
+     * {@link ArrayList} instance with default dataset provided.
      *
+     * @param elements to initialize an {@link ArrayList} with data.
      */
-    public ArrayList(Collection<T> elements) {
+    public ArrayList(@NotNull Collection<T> elements) {
         this.addAll(elements);
     }
 
@@ -51,7 +65,13 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public boolean add(T element) {
-        return false;
+        if (size < values.length) {
+            values[size++] = element;
+            return true;
+        } else {
+            doubleValuesArraySize();
+            return add(element);
+        }
     }
 
     /**
@@ -69,7 +89,20 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public boolean add(int index, T element) {
-        return false;
+        if ( index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        Object[] subArray = new Object[size - (index + 1)];
+        System.arraycopy(values, index, subArray, 0, size - (index + 1));
+
+        values[index] = element;
+        if (values.length < subArray.length + index + 1) {
+            doubleValuesArraySize();
+        }
+
+        System.arraycopy(subArray, 0, values, index + 1, subArray.length);
+        return true;
     }
 
     /**
@@ -82,11 +115,14 @@ public class ArrayList<T> implements List<T> {
      * @return {@code true} if this list changed as a result of the call
      * @throws ClassCastException       if the class of an element of the specified collection prevents
      *                                  it from being added to this list
+     * @throws NullPointerException     if the specified collection contains one or more null elements and
+     *                                  this list does not permit null elements, or if the specified collection
+     *                                  is null
      * @throws IllegalArgumentException if some property of an element of the specified collection prevents
      *                                  it from being added to this list.
      */
     @Override
-    public boolean addAll(Collection<? extends T> elements) {
+    public boolean addAll(@NotNull Collection<? extends T> elements) {
         return false;
     }
 
@@ -117,11 +153,16 @@ public class ArrayList<T> implements List<T> {
      *
      * @param index index of the element to return
      * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range, {@code (index < 0 || index > size())}
+     * @throws ArrayIndexOutOfBoundsException if the index is out of range,
+     *                                        {@code (index < 0 || index > size())}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public T get(int index) {
-        return null;
+        if (index < size) {
+            return (T) values[index];
+        }
+        throw new IndexOutOfBoundsException();
     }
 
     /**
@@ -206,7 +247,35 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public void clear() {
+        // do-nothing
+    }
 
+    /**
+     * Returns true if this collection contains the specified element. More formally,
+     * returns true if and only if this collection contains at least one element e such
+     * that Objects.equals(o, e).
+     *
+     * @param element whose presence in this collection is to be tested
+     * @return {@code true} if this collection contains the specified element
+     * @throws ClassCastException if the type of the specified element is incompatible
+     *                            with this collection (optional)
+     */
+    @Override
+    public boolean contains(T element) {
+        return false;
+    }
+
+    /**
+     * Returns true if this collection contains all the elements in the specified collection.
+     *
+     * @param elements collection to be checked for containment in this collection
+     * @return {@code true} if this collection contains all the elements in the specified collection
+     * @throws ClassCastException if the types of one or more elements in the specified
+     *                            collection are incompatible with this collection (optional)
+     * @see #contains(T)
+     */
+    public boolean containsAll(Collection<T> elements) {
+        return false;
     }
 
     /**
@@ -226,7 +295,7 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public boolean isEmpty() {
-        return false;
+        return size == 0;
     }
 
     /**
@@ -237,7 +306,7 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     /**
@@ -308,8 +377,48 @@ public class ArrayList<T> implements List<T> {
      *
      * @return an Iterator.
      */
+    @NotNull
     @Override
     public Iterator<T> iterator() {
-        return null;
+        return new Iterator<>() {
+            /**
+             * Pointer to current index.
+             */
+            private int index = 0;
+
+            /**
+             * Returns {@code true} if the iteration has more elements.
+             * (In other words, returns {@code true} if {@link #next} would
+             * return an element rather than throwing an exception.)
+             *
+             * @return {@code true} if the iteration has more elements.
+             */
+            @Override
+            public boolean hasNext() {
+                return index < size;
+            }
+
+            /**
+             * Returns the next element in the iteration.
+             *
+             * @return the next element in the iteration
+             * @throws NoSuchElementException if the iteration has no more elements.
+             */
+            @SuppressWarnings("unchecked")
+            @Override
+            public T next() {
+                return (T) values[index++];
+            }
+        };
+    }
+
+    /**
+     * Double the {@link #values} array size when it's reached to overflow by one index.
+     */
+    private void doubleValuesArraySize() {
+        Object[] newValues = new Object[values.length * 2];
+        System.arraycopy(values, 0, newValues, 0, values.length);
+
+        values = newValues;
     }
 }
