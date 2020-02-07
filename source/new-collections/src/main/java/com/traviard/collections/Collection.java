@@ -16,6 +16,34 @@ public interface Collection<E> extends Iterable<E> {
     void clear();
 
     /**
+     * Returns true if this collection contains the specified element. More formally,
+     * returns true if and only if this collection contains at least one element e such
+     * that Objects.equals(o, e).
+     *
+     * @param element whose presence in this collection is to be tested
+     * @return {@code true} if this collection contains the specified element
+     * @throws ClassCastException   if the type of the specified element is incompatible
+     *                              with this collection (optional)
+     * @throws NullPointerException if the specified element is null and this collection
+     *                              does not permit null elements (optional)
+     */
+    boolean contains(E element);
+
+    /**
+     * Returns true if this collection contains all the elements in the specified collection.
+     *
+     * @param elements collection to be checked for containment in this collection
+     * @return {@code true} if this collection contains all the elements in the specified collection
+     * @throws ClassCastException   if the types of one or more elements in the specified
+     *                              collection are incompatible with this collection (optional)
+     * @throws NullPointerException if the specified collection contains one or more null
+     *                              elements and this collection does not permit null elements
+     *                              (optional), or if the specified collection is null.
+     * @see #contains(E)
+     */
+    boolean containsAll(Collection<E> elements);
+
+    /**
      * Return an exact copy of this {@link Collection<E>} with new reference details.
      *
      * @return a new instance of this {@link Collection<E>}.
@@ -23,7 +51,7 @@ public interface Collection<E> extends Iterable<E> {
     Collection<E> copy();
 
     /**
-     * Returns true if this collection contains no elements.
+     * Returns {@code true} if this collection contains no elements.
      *
      * @return {@code true} if this collection contains no elements.
      */
