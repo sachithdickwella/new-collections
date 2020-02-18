@@ -78,10 +78,10 @@ public interface Collection<E> extends Iterable<E> {
      * @return an array, whose runtime component type is Object, containing all the elements in
      * this collection
      * @apiNote This method acts as a bridge between array-based and collection-based APIs. It
-     * returns an array whose runtime type is {@link E[]}. Use {@code toArray(T[])} to reuse an
+     * returns an array whose runtime type is {@link Object[]}. Use {@code toArray(T[])} to reuse an
      * existing array.
      */
-    E[] toArray();
+    Object[] toArray();
 
     /**
      * Returns an array containing all the elements in this collection; the runtime type of the
