@@ -16,7 +16,7 @@ public class ArrayListTest {
     /**
      * Elements count to insert to new {@link ArrayList}.
      */
-    private static final int INIT_ELEMENT_COUNT = 1_000;
+    private static final int INIT_ELEMENT_COUNT = 10;
     /**
      * New {@link ArrayList} instance to use across this test class.
      */
@@ -32,13 +32,20 @@ public class ArrayListTest {
     }
 
     /**
+     * Common assertion for almost all test cases.
+     */
+    @BeforeEach
+    private void commonAssert() {
+        assertNotNull(list, "ArrayList instance is null");
+    }
+
+    /**
      *
      */
     @Order(1)
     @Test
     @DisplayName("add(T) function test")
     public void addTest() {
-        assertNotNull(list, "ArrayList instance is null");
         assertTrue(list.isEmpty(), "ArrayList is not empty before add(T) invoke first time");
 
         for (int i = 0; i <= INIT_ELEMENT_COUNT; i++) {
@@ -61,12 +68,39 @@ public class ArrayListTest {
      */
     @Order(2)
     @Test
+    @DisplayName("add(int, T) function test")
+    public void insertTest() {
+        assertTrue(list.add(5, -456));
+        assertEquals(INIT_ELEMENT_COUNT + 2, list.size(), "ArrayList size() is invalid");
+        assertThrows(IndexOutOfBoundsException.class, () -> list.add(20, 100));
+    }
+
+    /**
+     *
+     */
+    @Order(3)
+    @Test
+    @DisplayName("remove(int) function test")
+    public void removeTest() {
+        // Reset the dataset by removing the element added in the previous step.
+        assertEquals(INIT_ELEMENT_COUNT + 2, list.size(), "Before 'remove()' ArrayList size() is invalid");
+        assertEquals(-456, list.remove(5));
+        assertEquals(INIT_ELEMENT_COUNT + 1, list.size(), "After 'remove()' ArrayList size() is invalid");
+
+        for (int i = 0; i < list.size(); i++) {
+            assertEquals(i, list.get(i), "Elements are not matching");
+        }
+    }
+
+    /**
+     *
+     */
+    @Order(4)
+    @Test
     @DisplayName("get(int) function test")
     public void getTest() {
-        assertNotNull(list, "ArrayList instance is null");
-        assertEquals(INIT_ELEMENT_COUNT + 1, list.size(), "ArrayList size() is invalid");
-        assertEquals(1000, list.get(list.size() - 1), "last index value is invalid");
-        assertEquals(640, list.get(640), "640th index value is invalid");
+        assertEquals(10, list.get(list.size() - 1), "last index value is invalid");
+        assertEquals(6, list.get(6), "640th index value is invalid");
         assertEquals(0, list.get(0), "0th index value is invalid");
         assertThrows(IndexOutOfBoundsException.class, () -> list.get(-1), "-1th index not throws IndexOutOfBoundException");
         assertThrows(IndexOutOfBoundsException.class, () -> list.get(list.size()),
@@ -84,13 +118,13 @@ public class ArrayListTest {
     /**
      *
      */
-    @Order(3)
+    @Order(5)
     @Test
-    @DisplayName("add(int, T) function test")
-    public void insertTest() {
-        assertNotNull(list, "ArrayList instance is null");
-        assertEquals(INIT_ELEMENT_COUNT + 1, list.size(), "ArrayList size() is invalid");
+    @DisplayName("toArray() function test")
+    public void toArrayTest() {
+        final Object[] newArray = list.toArray();
 
-        assertTrue(list.add(100, -456));
+        assertNotNull(newArray, "The new array returned, is null");
+        assertEquals(list.size(), newArray.length, "Invalid array size");
     }
 }

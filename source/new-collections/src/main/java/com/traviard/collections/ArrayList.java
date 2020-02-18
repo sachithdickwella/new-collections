@@ -2,8 +2,11 @@ package com.traviard.collections;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * @author Sachith Dickwella
@@ -89,19 +92,17 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public boolean add(int index, T element) {
-        if ( index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException();
+        if (index >= size() || index < 0) {
+            throw new IndexOutOfBoundsException(String.format("Index out of range: %d", index));
         }
 
-        Object[] subArray = new Object[size - (index + 1)];
-        System.arraycopy(values, index, subArray, 0, size - (index + 1));
-
-        values[index] = element;
-        if (values.length < subArray.length + index + 1) {
+        if (values.length < values.length + 1) {
             doubleValuesArraySize();
         }
 
-        System.arraycopy(subArray, 0, values, index + 1, subArray.length);
+        System.arraycopy(values, index, values, index + 1, size++);
+        values[index] = element;
+
         return true;
     }
 
@@ -159,10 +160,10 @@ public class ArrayList<T> implements List<T> {
     @SuppressWarnings("unchecked")
     @Override
     public T get(int index) {
-        if (index < size) {
-            return (T) values[index];
+        if (index >= size() || index < 0) {
+            throw new IndexOutOfBoundsException(String.format("Index out of range: %d", index));
         }
-        throw new IndexOutOfBoundsException();
+        return (T) values[index];
     }
 
     /**
@@ -192,7 +193,12 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public T remove(int index) {
-        return null;
+        T val = get(index);
+
+        System.arraycopy(values, index + 1, values, index, size() - (index + 1));
+        values[--size] = null;
+
+        return val;
     }
 
     /**
@@ -238,7 +244,10 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public T set(int index, T element) {
-        return null;
+        T val = get(index);
+        values[index] = element;
+
+        return val;
     }
 
     /**
@@ -322,12 +331,12 @@ public class ArrayList<T> implements List<T> {
      * @return an array, whose runtime component type is Object, containing all the elements in
      * this collection
      * @apiNote This method acts as a bridge between array-based and collection-based APIs. It
-     * returns an array whose runtime type is {@link T[]}. Use {@code toArray(T[])} to reuse an
+     * returns an array whose runtime type is {@link Object[]}. Use {@code toArray(T[])} to reuse an
      * existing array.
      */
     @Override
-    public T[] toArray() {
-        return null;
+    public Object[] toArray() {
+        return Arrays.copyOf(values, size);
     }
 
     /**
@@ -367,9 +376,17 @@ public class ArrayList<T> implements List<T> {
      * Note that toArray(new Object[0]) is identical in function to toArray().
      * <p>
      */
+    @SuppressWarnings("unchecked")
     @Override
     public <E> E[] toArray(E[] collector) {
-        return null;
+        Objects.requireNonNull(collector, "Runtime type array is null");
+        if (size <= collector.length) {
+            System.arraycopy(values, 0, collector, 0, size);
+            return collector;
+        } else {
+            collector = (E[]) Array.newInstance(collector.getClass(), size);
+            return toArray(collector);
+        }
     }
 
     /**
