@@ -72,7 +72,7 @@ public class ArrayListTest {
     public void insertTest() {
         assertTrue(list.add(5, -456));
         assertEquals(INIT_ELEMENT_COUNT + 2, list.size(), "ArrayList size() is invalid");
-        assertThrows(IndexOutOfBoundsException.class, () -> list.add(20, 100));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.add(-1, 100));
     }
 
     /**
@@ -126,5 +126,34 @@ public class ArrayListTest {
 
         assertNotNull(newArray, "The new array returned, is null");
         assertEquals(list.size(), newArray.length, "Invalid array size");
+
+        /*
+         * Check iterator functionality.
+         */
+        int idx = 0;
+        for (Object i : newArray) {
+            assertEquals(idx++, i, "Iterated value is invalid");
+        }
+    }
+
+    /**
+     *
+     */
+    @Order(6)
+    @Test
+    @DisplayName("toArray(T[]) function test")
+    public void toArrayGenericTest() {
+        final Integer[] newArray = list.toArray(new Integer[10]);
+
+        assertNotNull(newArray, "The new array returned, is null");
+        assertEquals(list.size(), newArray.length, "Invalid array size");
+
+        /*
+         * Check iterator functionality.
+         */
+        int idx = 0;
+        for (int i : newArray) {
+            assertEquals(idx++, i, "Iterated value is invalid");
+        }
     }
 }
