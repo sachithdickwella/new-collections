@@ -1,8 +1,8 @@
 package com.traviard.collections;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -15,20 +15,40 @@ import java.util.Objects;
 public class ArrayList<T> implements List<T> {
 
     /**
+     * Default capacity of the array if an initial size is not defined.
+     */
+    private static final int DEFAULT_CAPACITY = 10;
+    /**
+     * Shared empty array instance used for empty instances.
+     */
+    private static final Object[] EMPTY_ELEMENT_DATA = {};
+    /**
      * Core array instance which hold all the data add into the {@link ArrayList}.
      */
     private Object[] values;
     /**
      * Keep the current index of the latest value.
      */
-    private int size = 0;
+    private int size;
+
+    /**
+     * Assign the parameterized {@code Object[]} to this {@link #values} array
+     * and create a new {@link ArrayList} along with it.
+     *
+     * @param values new {@code Object[]} with init values.
+     * @param size current size of the {@link ArrayList}.
+     */
+    private ArrayList(Object[] values, int size) {
+        this.values = values;
+        this.size = size;
+    }
 
     /**
      * Default constructor implementation initialize {@link #values} instance with
      * default configuration. Which is new {@link Object[]} with size default to {@code 10}.
      */
     public ArrayList() {
-        values = new Object[10];
+        values = new Object[DEFAULT_CAPACITY];
     }
 
     /**
@@ -45,10 +65,17 @@ public class ArrayList<T> implements List<T> {
      * Overloaded constructor implementation with {@link Collection<T>} to initialize a
      * {@link ArrayList} instance with default dataset provided.
      *
+     * If the {@code elements} parameter value is null, still creates the {@link ArrayList}
+     * with empty collection.
+     *
      * @param elements to initialize an {@link ArrayList} with data.
      */
-    public ArrayList(@NotNull Collection<T> elements) {
-        this.addAll(elements);
+    public ArrayList(@Nullable Collection<T> elements) {
+        if (elements != null && elements.size() != 0) {
+            this.addAll(elements);
+        } else {
+            values = EMPTY_ELEMENT_DATA;
+        }
     }
 
     /**
@@ -72,7 +99,7 @@ public class ArrayList<T> implements List<T> {
             values[size++] = element;
             return true;
         } else {
-            doubleValuesArraySize();
+            values = doubleValuesArraySize();
             return add(element);
         }
     }
@@ -97,7 +124,7 @@ public class ArrayList<T> implements List<T> {
         }
 
         if (values.length < values.length + 1) {
-            doubleValuesArraySize();
+            values = doubleValuesArraySize();
         }
 
         System.arraycopy(values, index, values, index + 1, size++);
@@ -124,7 +151,23 @@ public class ArrayList<T> implements List<T> {
      */
     @Override
     public boolean addAll(@NotNull Collection<? extends T> elements) {
-        return false;
+        Objects.requireNonNull(elements, "Collection instance is null");
+
+        final Object[] els = elements.toArray();
+        if (els.length != 0) {
+            if (isEmpty()) {
+                values = els;
+            } else {
+                if (values.length < size + els.length) {
+                    values = doubleValuesArraySize();
+                }
+                System.arraycopy(els, 0, values, size - 1, els.length);
+            }
+            size += els.length;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -288,13 +331,13 @@ public class ArrayList<T> implements List<T> {
     }
 
     /**
-     * Return an exact copy of this {@link Collection<T>} with new reference details.
+     * Return an exact copy of this {@link ArrayList<T>} with new references.
      *
-     * @return a new instance of this {@link Collection<T>}.
+     * @return a new instance of this {@link ArrayList<T>}.
      */
     @Override
     public List<T> copy() {
-        return null;
+        return new ArrayList<>(Arrays.copyOf(values, size()), size());
     }
 
     /**
@@ -378,15 +421,15 @@ public class ArrayList<T> implements List<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <E> E[] toArray(E[] collector) {
+    public <E> E[] toArray(@NotNull E[] collector) {
         Objects.requireNonNull(collector, "Runtime type array is null");
-        if (size <= collector.length) {
-            System.arraycopy(values, 0, collector, 0, size);
-            return collector;
-        } else {
-            collector = (E[]) Array.newInstance(collector.getClass(), size);
-            return toArray(collector);
+        if (size > collector.length) {
+            return (E[]) Arrays.copyOf(values, size, collector.getClass());
         }
+
+        //noinspection SuspiciousSystemArraycopy
+        System.arraycopy(values, 0, collector, 0, size);
+        return collector;
     }
 
     /**
@@ -432,10 +475,10 @@ public class ArrayList<T> implements List<T> {
     /**
      * Double the {@link #values} array size when it's reached to overflow by one index.
      */
-    private void doubleValuesArraySize() {
-        Object[] newValues = new Object[values.length * 2];
+    private Object[] doubleValuesArraySize() {
+        final Object[] newValues = new Object[values.length * 2];
         System.arraycopy(values, 0, newValues, 0, values.length);
 
-        values = newValues;
+        return newValues;
     }
 }
