@@ -39,9 +39,6 @@ public class ArrayListTest {
         assertNotNull(list, "ArrayList instance is null");
     }
 
-    /**
-     *
-     */
     @Order(1)
     @Test
     @DisplayName("add(T) function test")
@@ -63,9 +60,6 @@ public class ArrayListTest {
         }
     }
 
-    /**
-     *
-     */
     @Order(2)
     @Test
     @DisplayName("add(int, T) function test")
@@ -75,9 +69,6 @@ public class ArrayListTest {
         assertThrows(IndexOutOfBoundsException.class, () -> list.add(-1, 100));
     }
 
-    /**
-     *
-     */
     @Order(3)
     @Test
     @DisplayName("remove(int) function test")
@@ -92,9 +83,6 @@ public class ArrayListTest {
         }
     }
 
-    /**
-     *
-     */
     @Order(4)
     @Test
     @DisplayName("get(int) function test")
@@ -115,9 +103,6 @@ public class ArrayListTest {
         }
     }
 
-    /**
-     *
-     */
     @Order(5)
     @Test
     @DisplayName("toArray() function test")
@@ -136,24 +121,144 @@ public class ArrayListTest {
         }
     }
 
-    /**
-     *
-     */
     @Order(6)
     @Test
     @DisplayName("toArray(T[]) function test")
     public void toArrayGenericTest() {
-        final Integer[] newArray = list.toArray(new Integer[10]);
+        /*
+         * Small array size provided.
+         */
+        Integer[] newArray = list.toArray(new Integer[5]);
 
         assertNotNull(newArray, "The new array returned, is null");
         assertEquals(list.size(), newArray.length, "Invalid array size");
 
         /*
+         * Larger array size provided.
+         */
+        newArray = list.toArray(new Integer[12]);
+
+        assertNotNull(newArray, "The new array returned, is null");
+
+        /*
          * Check iterator functionality.
          */
-        int idx = 0;
-        for (int i : newArray) {
-            assertEquals(idx++, i, "Iterated value is invalid");
+        for (int idx = 0; idx < newArray.length; idx++) {
+            if (idx < list.size()) {
+                assertEquals(idx, newArray[idx], "Iterated value is invalid");
+            } else {
+                assertNull(newArray[idx]);
+            }
         }
+
+        /*
+         * Different compatible type array provided.
+         */
+        final Number[] newLongArray = list.toArray(new Number[list.size()]);
+
+        assertNotNull(newLongArray, "The new array returned, is null");
+        assertEquals(list.size(), newLongArray.length, "Invalid array size");
+
+        int idx = 0;
+        for (Number l : newLongArray) {
+            assertEquals(idx++, l, "Iterated value is invalid");
+        }
+
+        /*
+         * Different non-compatible type array provided.
+         */
+        assertThrows(ArrayStoreException.class, () -> list.toArray(new Long[list.size()]));
+    }
+
+    @Order(7)
+    @Test
+    @DisplayName("copy() function test")
+    public void copyTest() {
+        final List<Integer> copy = list.copy();
+
+        assertEquals(list.size(), copy.size(), "Copied list size is invalid");
+
+        copy.remove(2);
+        assertEquals(list.size() - 1, copy.size(), """
+                Copied list size is invalid, after one element removed
+                """);
+
+        copy.add(20);
+        copy.add(21);
+        assertEquals(list.size() + 1, copy.size(), """
+                Copied list size is invalid, after two elements added
+                """);
+    }
+
+    @Order(8)
+    @Test
+    @DisplayName("ArrayList(Collection<>T constructor test")
+    public void constructor1Test() {
+        List<Integer> preInitList = new ArrayList<>(list);
+
+        assertNotNull(preInitList, "New list instance is null");
+        assertEquals(list.size(), preInitList.size(), "preInitList size is invalid");
+
+        preInitList.add(20);
+        preInitList.add(30);
+        assertEquals(list.size() + 2, preInitList.size(), """
+                preInitList size is invalid, after two elements added
+                """);
+
+        preInitList.remove(5);
+        assertEquals(list.size() + 1, preInitList.size(), """
+                preInitList size is invalid, after one element removed
+                """);
+
+        preInitList = new ArrayList<>(null);
+
+        assertEquals(0, preInitList.size(), """
+                preInitList size is invalid, on null initial collection
+                """);
+    }
+
+    @Order(9)
+    @Test
+    @DisplayName("addAll(Collection<T> function test)")
+    public void addAll1Test() {
+        List<Integer> preInitList = new ArrayList<>(20);
+
+        assertEquals(0, preInitList.size(), """
+                preInitList size is invalid, with initial size constructor
+                """);
+
+        assertTrue(preInitList.addAll(list), """
+                addAll with not empty Collection, hasn't made any effect on preInitList
+                """);
+        assertFalse(preInitList.addAll(new ArrayList<>()), """
+                addAll with empty Collection, has made an effect on preInitList
+                """);
+        assertEquals(list.size(), preInitList.size(), """
+                preInitList size is invalid, after addAll from main 'list'
+                """);
+        assertTrue(preInitList.addAll(list), """
+                addAll with not empty Collection (again), hasn't made any effect on preInitList
+                """);
+        assertEquals(list.size() * 2, preInitList.size(), """
+                preInitList size is invalid, after addAll from main 'list' again
+                """);
+
+        assertEquals(3, preInitList.remove(3), "Remove by an index, returns an invalid value");
+        assertEquals((list.size() * 2) - 1, preInitList.size(), """
+                preInitList size is invalid, after 'remove()' a one element
+                """);
+
+        preInitList.add(3, 3);
+        assertEquals(list.size() * 2, preInitList.size(), """
+                preInitList size is invalid, after add(int, T) again
+                """);
+
+        //for (int i = 1; i <= 2; i++) {
+            for (int idx = 0; idx < preInitList.size(); idx++) {
+                System.out.println(preInitList.get(idx));
+                //assertEquals(idx * i, preInitList.get(idx * i), "Iterated value is invalid");
+            }
+        //}
+
     }
 }
