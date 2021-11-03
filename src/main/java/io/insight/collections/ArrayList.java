@@ -1,4 +1,4 @@
-package com.traviard.collections;
+package io.insight.collections;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,18 +32,6 @@ public class ArrayList<T> implements List<T> {
     private int size;
 
     /**
-     * Assign the parameterized {@code Object[]} to this {@link #values} array
-     * and create a new {@link ArrayList} along with it.
-     *
-     * @param values new {@code Object[]} with init values.
-     * @param size current size of the {@link ArrayList}.
-     */
-    private ArrayList(Object[] values, int size) {
-        this.values = values;
-        this.size = size;
-    }
-
-    /**
      * Default constructor implementation initialize {@link #values} instance with
      * default configuration. Which is new {@link Object[]} with size default to {@code 10}.
      */
@@ -64,7 +52,7 @@ public class ArrayList<T> implements List<T> {
     /**
      * Overloaded constructor implementation with {@link Collection<T>} to initialize a
      * {@link ArrayList} instance with default dataset provided.
-     *
+     * <p>
      * If the {@code elements} parameter value is null, still creates the {@link ArrayList}
      * with empty collection.
      *
@@ -76,6 +64,18 @@ public class ArrayList<T> implements List<T> {
         } else {
             values = EMPTY_ELEMENT_DATA;
         }
+    }
+
+    /**
+     * Assign the parameterized {@code Object[]} to this {@link #values} array
+     * and create a new {@link ArrayList} along with it.
+     *
+     * @param values new {@code Object[]} with init values.
+     * @param size   current size of the {@link ArrayList}.
+     */
+    private ArrayList(Object[] values, int size) {
+        this.values = values;
+        this.size = size;
     }
 
     /**
@@ -467,7 +467,9 @@ public class ArrayList<T> implements List<T> {
             @SuppressWarnings("unchecked")
             @Override
             public T next() {
-                return (T) values[index++];
+                if (index < values.length) return (T) values[index++];
+                else throw new NoSuchElementException("List size %d exceeded, cannot access %d index."
+                        .formatted(values.length, index - 1));
             }
         };
     }
@@ -475,6 +477,7 @@ public class ArrayList<T> implements List<T> {
     /**
      * Double the {@link #values} array size when it's reached to overflow by one index.
      */
+    @NotNull
     private Object[] doubleValuesArraySize() {
         final Object[] newValues = new Object[values.length * 2];
         System.arraycopy(values, 0, newValues, 0, values.length);
