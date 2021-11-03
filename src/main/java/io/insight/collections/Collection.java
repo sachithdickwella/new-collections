@@ -1,4 +1,4 @@
-package com.traviard.collections;
+package io.insight.collections;
 
 /**
  * @author Sachith Dickwella

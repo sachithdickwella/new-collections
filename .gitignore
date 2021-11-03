@@ -1,6 +1,6 @@
 # Ide specific files to be ignored.
-*.idea
+*.idea/
 *.iml
 
 # Application and build specific files to be ignored.
-target
+target/

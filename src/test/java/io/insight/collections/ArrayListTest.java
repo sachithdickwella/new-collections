@@ -1,4 +1,4 @@
-package com.traviard.collections;
+package io.insight.collections;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.function.ThrowingSupplier;
@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Sachith Dickwella
- * @since 1.0
+ * @since 1.0.0
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("ArrayList functionality unit tests")
@@ -42,7 +42,7 @@ public class ArrayListTest {
     @Order(1)
     @Test
     @DisplayName("add(T) function test")
-    public void addTest() {
+    void addTest() {
         assertTrue(list.isEmpty(), "ArrayList is not empty before add(T) invoke first time");
 
         for (int i = 0; i <= INIT_ELEMENT_COUNT; i++) {
@@ -63,7 +63,7 @@ public class ArrayListTest {
     @Order(2)
     @Test
     @DisplayName("add(int, T) function test")
-    public void insertTest() {
+    void insertTest() {
         assertTrue(list.add(5, -456));
         assertEquals(INIT_ELEMENT_COUNT + 2, list.size(), "ArrayList size() is invalid");
         assertThrows(IndexOutOfBoundsException.class, () -> list.add(-1, 100));
@@ -72,7 +72,7 @@ public class ArrayListTest {
     @Order(3)
     @Test
     @DisplayName("remove(int) function test")
-    public void removeTest() {
+    void removeTest() {
         // Reset the dataset by removing the element added in the previous step.
         assertEquals(INIT_ELEMENT_COUNT + 2, list.size(), "Before 'remove()' ArrayList size() is invalid");
         assertEquals(-456, list.remove(5));
@@ -86,12 +86,14 @@ public class ArrayListTest {
     @Order(4)
     @Test
     @DisplayName("get(int) function test")
-    public void getTest() {
-        assertEquals(10, list.get(list.size() - 1), "last index value is invalid");
+    void getTest() {
+        int size = list.size();
+
+        assertEquals(10, list.get(size - 1), "last index value is invalid");
         assertEquals(6, list.get(6), "640th index value is invalid");
         assertEquals(0, list.get(0), "0th index value is invalid");
         assertThrows(IndexOutOfBoundsException.class, () -> list.get(-1), "-1th index not throws IndexOutOfBoundException");
-        assertThrows(IndexOutOfBoundsException.class, () -> list.get(list.size()),
+        assertThrows(IndexOutOfBoundsException.class, () -> list.get(size),
                 "Index larger than size of the list not throws IndexOutOfBoundException");
 
         /*
@@ -106,7 +108,7 @@ public class ArrayListTest {
     @Order(5)
     @Test
     @DisplayName("toArray() function test")
-    public void toArrayTest() {
+    void toArrayTest() {
         final Object[] newArray = list.toArray();
 
         assertNotNull(newArray, "The new array returned, is null");
@@ -124,14 +126,15 @@ public class ArrayListTest {
     @Order(6)
     @Test
     @DisplayName("toArray(T[]) function test")
-    public void toArrayGenericTest() {
+    void toArrayGenericTest() {
+        int size = list.size();
         /*
          * Small array size provided.
          */
         Integer[] newArray = list.toArray(new Integer[5]);
 
         assertNotNull(newArray, "The new array returned, is null");
-        assertEquals(list.size(), newArray.length, "Invalid array size");
+        assertEquals(size, newArray.length, "Invalid array size");
 
         /*
          * Larger array size provided.
@@ -144,7 +147,7 @@ public class ArrayListTest {
          * Check iterator functionality.
          */
         for (int idx = 0; idx < newArray.length; idx++) {
-            if (idx < list.size()) {
+            if (idx < size) {
                 assertEquals(idx, newArray[idx], "Iterated value is invalid");
             } else {
                 assertNull(newArray[idx]);
@@ -154,10 +157,10 @@ public class ArrayListTest {
         /*
          * Different compatible type array provided.
          */
-        final Number[] newLongArray = list.toArray(new Number[list.size()]);
+        final Number[] newLongArray = list.toArray(new Number[size]);
 
         assertNotNull(newLongArray, "The new array returned, is null");
-        assertEquals(list.size(), newLongArray.length, "Invalid array size");
+        assertEquals(size, newLongArray.length, "Invalid array size");
 
         int idx = 0;
         for (Number l : newLongArray) {
@@ -167,13 +170,13 @@ public class ArrayListTest {
         /*
          * Different non-compatible type array provided.
          */
-        assertThrows(ArrayStoreException.class, () -> list.toArray(new Long[list.size()]));
+        assertThrows(ArrayStoreException.class, () -> list.toArray(new Long[size]));
     }
 
     @Order(7)
     @Test
     @DisplayName("copy() function test")
-    public void copyTest() {
+    void copyTest() {
         final List<Integer> copy = list.copy();
 
         assertEquals(list.size(), copy.size(), "Copied list size is invalid");
@@ -193,7 +196,7 @@ public class ArrayListTest {
     @Order(8)
     @Test
     @DisplayName("ArrayList(Collection<>T constructor test")
-    public void constructor1Test() {
+    void constructor1Test() {
         List<Integer> preInitList = new ArrayList<>(list);
 
         assertNotNull(preInitList, "New list instance is null");
@@ -220,7 +223,7 @@ public class ArrayListTest {
     @Order(9)
     @Test
     @DisplayName("addAll(Collection<T> function test)")
-    public void addAll1Test() {
+    void addAll1Test() {
         List<Integer> preInitList = new ArrayList<>(20);
 
         assertEquals(0, preInitList.size(), """
