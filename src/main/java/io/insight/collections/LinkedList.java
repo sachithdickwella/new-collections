@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
+import static java.lang.String.format;
+
 /**
  * @author Sachith Dickwella
  * @since 1.0
@@ -13,11 +15,11 @@ public class LinkedList<T> implements List<T> {
     /**
      *
      */
-    private Node<T> first;
+    private Node<T> head;
     /**
      *
      */
-    private Node<T> last;
+    private Node<T> tail;
     /**
      * Keep the current index of the latest value.
      */
@@ -57,6 +59,16 @@ public class LinkedList<T> implements List<T> {
      */
     @Override
     public boolean add(T element) {
+        Node<T> t = tail;
+        Node<T> newNode = new Node<>(t, element, null);
+        tail = newNode;
+
+        if (t == null) {
+            head = newNode;
+        } else {
+            t.next = newNode;
+        }
+        size++;
         return true;
     }
 
@@ -79,7 +91,14 @@ public class LinkedList<T> implements List<T> {
      */
     @Override
     public boolean add(int index, T element) {
-        return false;
+        if (!isIndexValid(index))
+            throw new IndexOutOfBoundsException(format("LinkedList index is out of bound: %d", index));
+
+        Node<T> node = node(index);
+        node.previous = new Node<>(node.previous, element, node);
+
+        size++; // TODO - Complete the method.
+        return true;
     }
 
     /**
@@ -139,7 +158,9 @@ public class LinkedList<T> implements List<T> {
      */
     @Override
     public T get(int index) {
-        return null;
+        if (!isIndexValid(index))
+            throw new IndexOutOfBoundsException(format("LinkedList index is out of bound: %d", index));
+        return node(index).value;
     }
 
     /**
@@ -239,9 +260,20 @@ public class LinkedList<T> implements List<T> {
      * @throws UnsupportedOperationException if the clear operation is not
      *                                       supported by this collection.
      */
+    @SuppressWarnings("java:S127")
     @Override
     public void clear() {
+        for (Node<T> node = head; node != null;) {
+            Node<T> n = node.next;
+            node.value = null;
+            node.next = null;
+            node.previous = null;
 
+            node = n;
+        }
+
+        head = tail = null;
+        size = 0;
     }
 
     /**
@@ -295,7 +327,7 @@ public class LinkedList<T> implements List<T> {
      */
     @Override
     public boolean isEmpty() {
-        return false;
+        return size == 0;
     }
 
     /**
@@ -306,7 +338,7 @@ public class LinkedList<T> implements List<T> {
      */
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     /**
@@ -388,17 +420,52 @@ public class LinkedList<T> implements List<T> {
      */
     private static class Node<T> {
 
+        /**
+         *
+         */
         private T value;
 
+        /**
+         *
+         */
         private Node<T> previous;
 
+        /**
+         *
+         */
         private Node<T> next;
 
         /**
          *
          */
-        public Node(T value) {
+        public Node(Node<T> previous, T value, Node<T> next) {
+            this.previous = previous;
             this.value = value;
+            this.next = next;
+        }
+    }
+
+    /**
+     *
+     */
+    private boolean isIndexValid(int index) {
+        return index < size;
+    }
+
+    /**
+     *
+     */
+    private Node<T> node(int index) {
+        if (index > (size >> 1)) {
+            Node<T> t = tail;
+            for (int i = size - 1; i > index; i--)
+                t = t.previous;
+            return t;
+        } else {
+            Node<T> h = head;
+            for (int i = 0; i < index; i++)
+                h = h.next;
+            return h;
         }
     }
 }
